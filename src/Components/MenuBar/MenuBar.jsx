@@ -11,6 +11,8 @@ import MeetingRoomIcon from '@mui/icons-material/MeetingRoom'
 import DoorBackIcon from '@mui/icons-material/DoorBack'
 import PowerIcon from '@mui/icons-material/Power'
 import PowerOffIcon from '@mui/icons-material/PowerOff'
+import KeyIcon from '@mui/icons-material/Key'
+import KeyOffIcon from '@mui/icons-material/KeyOff'
 import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
@@ -31,6 +33,7 @@ const MenuBar = () => {
   const [snackVariant, setSnackVariant] = useState('error')
   const [showSettingsDialog, setShowSettingDialog] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState(false)
+  const [simulateUnlockProblem, setSimulateUnlockProblem] = useState(false)
 
   useEffect(() => {
     // console.log('RENDER')
@@ -162,6 +165,8 @@ const MenuBar = () => {
           setSnackVariant('error')
           setShowSnack(true)
           ws.send(JSON.stringify({ action: 'lockCommand', payload: { success: false, message: { error: 'Car have opened door' }, responseId } }))
+        } else if (action === 'UNLOCK' && simulateUnlockProblem) {
+          ws.send(JSON.stringify({ action: 'lockCommand', payload: { success: false, message: { error: 'Problem with unlock car' }, responseId } }))
         } else {
           lockControl(action === 'LOCK')
           ws.send(JSON.stringify({ action: 'lockCommand', payload: { success: true, message: { message: 'Successfully sent request to vehicle', status: 'success' }, responseId } }))
@@ -176,6 +181,14 @@ const MenuBar = () => {
         <Typography variant='h5'>{settingsState.attributes.make} {settingsState.attributes.model} {settingsState.attributes.year}</Typography>
 
         <Box display='flex'>
+          <Box color={simulateUnlockProblem ? 'gold' : 'white'}>
+              <IconButton color='inherit' size='small' onClick={() => setSimulateUnlockProblem(!simulateUnlockProblem)}>
+                <Tooltip title={`Simulate unlock problem - ${simulateUnlockProblem ? 'ON' : 'OFF'}`} arrow>{simulateUnlockProblem ? <KeyIcon /> : <KeyOffIcon />}</Tooltip>
+              </IconButton>
+            </Box>
+
+          <Box margin={0.8} borderRight='1px solid white' borderLeft='1px solid white'></Box>
+
           <Box color={settingsState.lockStatus.isLocked === false ? 'gold' : 'white'}>
             <IconButton color='inherit' size='small' onClick={lockControl}>
               <Tooltip title={settingsState.lockStatus.isLocked ? 'Car is locked' : 'Car is unlocked'} arrow>{settingsState.lockStatus.isLocked ? <LockIcon /> : <LockOpenIcon />}</Tooltip>
